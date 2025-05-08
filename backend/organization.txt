@@ -1,0 +1,30 @@
+Backend:
+Function to get an organized comment thread. (Tree like structure (using maps), with user, content information)
+Function to use summarize using ChatGPT
+set up backend
+
+Frontend:
+Input for reddit thread url
+Function to get all the comments in the related thread, above. (ie, all the previous comments in the chain)
+Generate a replica of the comment reply chain basically
+When pressing a comment, explain context behind it
+
+
+Extra:
+OAuth for frontend
+"Most Interesting" feature
+Function to push this to an Elastic Search Thing
+- Save the entire thread structure to Elastic Search
+- Save the original post content
+Function to get from Elastic Search
+
+
+Design
+A tree that holds a struct that holds
+- the author
+- the text
+- A pointer to the parent struct
+
+The Backend queries and sends a tree to frontend
+The frontend displays it, and caches the paths to each node
+When the user presses a node, it will send the information of the cached path to the backend, to create a generation

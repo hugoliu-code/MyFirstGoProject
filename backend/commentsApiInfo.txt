@@ -1,0 +1,11 @@
+To find the subreddit, text
+- Array[0][data][children][0][data][subreddit/selftext]
+- [author] for author
+to find comment reply chains
+Array[1][data][children] each of these is a beginning
+of a reply 
+
+from each you can check if there is "replies" as a key. If yes, we can do [replies][data][children] again to get a list of replies, and recurse again
+
+[author] is the author
+[body] is the text
