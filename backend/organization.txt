@@ -1,7 +1,8 @@
 Backend:
-Function to get an organized comment thread. (Tree like structure (using maps), with user, content information)
+DONE --- Function to get an organized comment thread. (Tree like structure (using maps), with user, content information)
 Function to use summarize using ChatGPT
-set up backend
+DONE (for the most part) set up backend
+
 
 Frontend:
 Input for reddit thread url
@@ -25,6 +26,20 @@ A tree that holds a struct that holds
 - the text
 - A pointer to the parent struct
 
+
 The Backend queries and sends a tree to frontend
 The frontend displays it, and caches the paths to each node
 When the user presses a node, it will send the information of the cached path to the backend, to create a generation
+
+
+TODO:
+URL input bar
+Button to input the URL
+Create function to fetch comment tree and return json
+Parse the response from the tree into a JS structure
+Display Comment Tree
+
+Create chatgpt Function
+Allow user to click a comment
+Bring up UI to display output from chatgpt function endpoint
+Make UI prettier

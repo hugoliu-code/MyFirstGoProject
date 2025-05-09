@@ -13,12 +13,15 @@ import (
 )
 
 type Comment struct {
-	Author   string     `json: "author"`
-	Text     string     `json: "text"`
-	Upvotes  string     `json: "upvotes"`
+	Author   string     `json:"author"`
+	Text     string     `json:"text"`
+	Upvotes  string     `json:"upvotes"`
 	Children []*Comment `json:"children,omitempty"`
 }
 
+func (c Comment) String() string {
+	return fmt.Sprintf("[Author: %s, Upvotes: %s, Comment %s]", c.Author, c.Upvotes, c.Text)
+}
 func PrintTree(node *Comment, indent string) {
 	if node == nil {
 		return
@@ -188,17 +191,12 @@ func CleanCommentThread(commentThread []map[string]interface{}) *Comment {
 	return &head
 }
 
-func GenerateSummary(commentChain []*Comment) string {
-	// take in a chain of comments, and generate a story of how this person got to say this
-	return "nothing"
-}
-
 func GetRedditAccessToken() string {
 	//... scraping logic
 	clientID := "NQkJ5LH6SrXecVMOJwx4PQ"
 	clientSecret := os.Getenv("REDDIT_SECRET")
-	username := os.Getenv("USERNAME")
-	password := os.Getenv("PASSWORD")
+	username := os.Getenv("REDDIT_USERNAME")
+	password := os.Getenv("REDDIT_PASSWORD")
 
 	data := url.Values{}
 	data.Set("grant_type", "password")

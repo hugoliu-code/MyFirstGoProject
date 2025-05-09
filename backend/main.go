@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/hugoliu-code/MyFirstGoProject/backend/handlers"
+	"github.com/hugoliu-code/MyFirstGoProject/Backend/handlers"
 	"github.com/joho/godotenv"
 )
 
@@ -22,6 +22,7 @@ func main() {
 	router.Use(cors.New(corsConfig))
 	router.GET("/authenticate", handlers.FetchAccessToken)
 	router.POST("/fetch", handlers.FetchCommentTree)
+	router.POST("/generate", handlers.FetchContextGeneration)
 	router.Run("localhost:8080")
 }
 
