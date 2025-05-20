@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hugoliu-code/MyFirstGoProject/backend/services"
+	"github.com/hugoliu-code/MyFirstGoProject/Backend/services"
 )
 
 type FetchCommentsRequest struct {
@@ -15,6 +15,12 @@ type FetchCommentsRequest struct {
 
 type FetchGenerationRequest struct {
 	Comments []*services.Comment
+}
+
+type AuthenticateWithCodeRequest struct {
+	Code        string
+	ClientID    string
+	RedirectURI string
 }
 
 func FetchCommentTree(c *gin.Context) {
@@ -53,10 +59,20 @@ func FetchAccessToken(c *gin.Context) {
 	})
 }
 
+func AuthenticateWithCode(c *gin.Context) {
+	var fetchRequest AuthenticateWithCodeRequest
+	c.BindJSON(&fetchRequest)
+	fmt.Println(fetchRequest.Code, fetchRequest.RedirectURI, fetchRequest.ClientID)
+	var accessToken = services.GetRedditAccessTokenOAuth(fetchRequest.Code, fetchRequest.RedirectURI, fetchRequest.ClientID)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"token":    accessToken,
+		"username": services.GetUsername(accessToken),
+	})
+}
+
 func FetchContextGeneration(c *gin.Context) {
 	var fetchRequest FetchGenerationRequest
 	c.BindJSON(&fetchRequest)
-	fmt.Println(fetchRequest)
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"response": services.GenerateSummary(fetchRequest.Comments),
 	})

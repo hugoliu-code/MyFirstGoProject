@@ -20,9 +20,10 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.New(corsConfig))
-	router.GET("/authenticate", handlers.FetchAccessToken)
+	router.POST("/authenticate", handlers.AuthenticateWithCode)
 	router.POST("/fetch", handlers.FetchCommentTree)
 	router.POST("/generate", handlers.FetchContextGeneration)
+
 	router.Run("localhost:8080")
 }
 

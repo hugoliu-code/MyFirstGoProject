@@ -62,6 +62,35 @@ func GetInfoFromUrl(url string) (string, string) {
 	return subreddit, postId
 }
 
+func GetUsername(accessToken string) string {
+	fmt.Println("ATTEMPTING TO GET USERNAME")
+	url := "https://oauth.reddit.com/api/v1/me"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", "bearer "+accessToken)
+	req.Header.Add("User-Agent", "ContextGeneratorAppDemo/0.1 by Specialist-Net-8473")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request failed:", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	stringBody := string(body)
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(body), &result)
+
+	fmt.Println(stringBody)
+	username, ok := result["name"].(string)
+	if !ok {
+		panic("Something went wrong in getting username")
+	}
+	return username
+}
+
 func GetCommentThread(subreddit, postID, accessToken string, result *[]map[string]interface{}) {
 	// Take in a postID within a subreddit and use api to get comments
 	url := fmt.Sprintf("https://oauth.reddit.com/r/%s/comments/%s?depth=20&limit=200&sort=top", subreddit, postID)
@@ -189,6 +218,43 @@ func CleanCommentThread(commentThread []map[string]interface{}) *Comment {
 	head := Comment{Author: GetNestedValue(commentThread[0], authorPath[:]), Text: GetNestedValue(commentThread[0], textPath[:]), Upvotes: GetNestedValue(commentThread[0], upvotesPath[:]), Children: []*Comment{}}
 	GetNestedTree(commentThread[1], &head)
 	return &head
+}
+
+func GetRedditAccessTokenOAuth(code string, redirectUri string, clientID string) string {
+	clientSecret := os.Getenv("REDDIT_SECRET")
+	data := url.Values{}
+	data.Set("grant_type", "authorization_code")
+	data.Set("code", code)
+	data.Set("redirect_uri", redirectUri)
+
+	req, err := http.NewRequest("POST", "https://www.reddit.com/api/v1/access_token", strings.NewReader(data.Encode()))
+	if err != nil {
+		panic(err)
+	}
+
+	req.SetBasicAuth(clientID, clientSecret)
+	req.Header.Add("User-Agent", "ContextGeneratorApp/0.1 by "+"Specialist-Net-8473")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != 200 {
+		fmt.Println("Failed to get token:", resp.Status)
+		fmt.Println(string(body))
+		panic("FAILED TO GET TOKEN")
+	}
+
+	var result map[string]interface{}
+	json.Unmarshal(body, &result)
+	// fmt.Println("Response JSON:", result)
+	return result["access_token"].(string)
 }
 
 func GetRedditAccessToken() string {

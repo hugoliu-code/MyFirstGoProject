@@ -43,3 +43,13 @@ Create chatgpt Function
 Allow user to click a comment
 Bring up UI to display output from chatgpt function endpoint
 Make UI prettier
+
+
+Last two days: focus on react, maybe deploy (add auth)
+ 
+
+TODO
+- Add username populating, turn login into logout and vice versa
+- Add info on screen when not looking at a reddit thread
+- "Please Login" when trying to query without being logged in
+- Deploy

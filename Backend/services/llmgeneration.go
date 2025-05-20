@@ -22,7 +22,9 @@ func GenerateSummary(commentChain []*Comment) string {
 	You are a useful comment section moderation assistent. Given a chain of comments in a comment thread,
 	tell a easily digestible story of the comment thread that led to the last comment. Then, describe whether
 	the comment might violate any of the following guidelines: ["no hate speech", "no racism", "no excessive profanity"
-	"no lewd statements"]. If none are violated, simply state that you believe there were no violations. 
+	"no lewd statements"]. If none are violated, simply state that you believe there were no violations. Do NOT hallucinate
+	comments that were not given to you. Do NOT mention the guidelines specifically. Act as if you are an integrated
+	tool in the comment section.
 	`
 
 	var commentString string

@@ -2,20 +2,51 @@
 
 import React, { useState, useEffect } from "react";
 import CommentTree, { CommentData } from "../components/CommentTree"; // Adjust path if needed
-
+import {
+  CLIENT_ID,
+  REDIRECT_URI,
+  RESPONSE_TYPE,
+  DURATION,
+  SCOPE_STRING,
+} from "../../constants/constants";
+import PopUp from "../components/PopUp";
+import TopBar from "../components/TopBar";
+import HomePage from "../components/HomePage";
 export default function Main() {
   const [url, setUrl] = useState("");
   const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
   const [commentsHead, setCommentsHead] = useState({
     author: "",
     text: "",
     children: [],
   });
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationResponse, setGenerationResponse] = useState("");
 
   useEffect(() => {
     // This function runs when the page/component is loaded
     console.log("Page loaded!");
-    fetchToken();
+    // Check if there are params that match an OAuth Response, if yes, handle it
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("state") || !params.has("code")) {
+      return;
+    }
+
+    const returnedState = params.get("state");
+    const storedState = localStorage.getItem("reddit_oauth_string");
+
+    console.log(returnedState);
+    console.log(storedState);
+
+    if (returnedState != storedState) {
+      return;
+    }
+
+    const returnedCode = params.get("code");
+
+    authenticate(String(returnedCode));
+    //fetchToken();
   }, []); // Empty dependency array = run only once on mount
 
   async function fetchToken() {
@@ -24,9 +55,36 @@ export default function Main() {
       if (!res.ok) throw new Error("Token request failed");
       const data = await res.json();
       setToken(data.token);
+      setUsername(data.username);
       console.log(data);
     } catch (err) {
       console.error("Error:", err);
+    }
+  }
+
+  async function authenticate(code: string) {
+    try {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: code,
+          clientID: CLIENT_ID,
+          redirectURI: REDIRECT_URI,
+        }),
+      };
+      const res = await fetch(
+        "http://127.0.0.1:8080/authenticate",
+        requestOptions
+      );
+      if (!res.ok) throw new Error("Fetch request failed");
+      const data = await res.json();
+      console.log(data);
+      setToken(data.token);
+      setUsername(data.username);
+      console.log(data.token);
+    } catch (err) {
+      console.error("Error", err);
     }
   }
 
@@ -50,34 +108,83 @@ export default function Main() {
   }
 
   async function handleContextClick(comments: CommentData[]): Promise<void> {
-    console.log(comments.map((n) => n.text));
-    // Send json data to backend
-    // Set a State for the output
-    // Create a window that overlays over the comments to display
+    setGenerationResponse("");
+    setIsGenerating(true);
+    try {
+      const response = await fetch("http://127.0.0.1:8080/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ comments }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const result = await response.json();
+      setGenerationResponse(result.response);
+      console.log("Server response:", result);
+    } catch (error) {
+      console.error("Error sending comments:", error);
+    }
+  }
+
+  async function handleLogin() {
+    let randomString = String(Math.random() * 10000);
+    localStorage.setItem("reddit_oauth_string", randomString);
+    var OAuthString = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&state=${randomString}&redirect_uri=${encodeURIComponent(
+      REDIRECT_URI
+    )}&duration=${DURATION}&scope=${encodeURIComponent(SCOPE_STRING)}`;
+    window.location.href = OAuthString;
+  }
+
+  function handleLogout() {
+    setToken("");
+    setUsername("");
+    setCommentsHead({
+      author: "",
+      text: "",
+      children: [],
+    });
+  }
+
+  function handleClosePopUp() {
+    setGenerationResponse("");
+    setIsGenerating(false);
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
   }
 
   return (
-    <div className="flex flex-col items-center justify-start bg-black h-screen overflow-y-auto p-4">
-      <div className="flex flex-col sm:flex-row gap-2">
-        <text className="">Reddit Moderation Simulator</text>
-        <input
-          type="text"
-          placeholder="Enter Reddit URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="px-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
-        />
-        <button
-          onClick={() => handleFetchClick()}
-          className="px-4 py-2 bg-blue-500 text-white font-medium rounded-md shadow-sm 
-                   hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300
-                   transition-colors duration-200"
-        >
-          Moderate!
-        </button>
-      </div>
-      <div>
-        <CommentTree data={commentsHead} onClick={handleContextClick} />
+    <div>
+      <TopBar
+        url={url}
+        username={username}
+        setUrl={setUrl}
+        handleFetchClick={handleFetchClick}
+        handleLogin={handleLogin}
+        handleLogout={handleLogout}
+      />
+      <div className="flex flex-col items-center justify-start bg-slate-50 h-screen overflow-y-auto p-4 pt-20">
+        {commentsHead.author != "" && (
+          <div>
+            <CommentTree data={commentsHead} onClick={handleContextClick} />
+          </div>
+        )}
+        {commentsHead.author == "" && (
+          <div>
+            <HomePage />
+          </div>
+        )}
+        <div>
+          <PopUp
+            showPopUp={isGenerating}
+            text={generationResponse}
+            closePopUp={handleClosePopUp}
+          ></PopUp>
+        </div>
       </div>
     </div>
   );
