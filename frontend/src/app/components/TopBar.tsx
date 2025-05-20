@@ -1,6 +1,5 @@
 import RedditIcon from "../../images/reddit-icon.png";
 import RedditAvatar from "../../images/reddit-avatar.png";
-import { useState } from "react";
 type TopBarProps = {
   url: string;
   username: string;

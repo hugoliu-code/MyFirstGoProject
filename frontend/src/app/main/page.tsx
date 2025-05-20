@@ -49,18 +49,18 @@ export default function Main() {
     //fetchToken();
   }, []); // Empty dependency array = run only once on mount
 
-  async function fetchToken() {
-    try {
-      const res = await fetch("http://127.0.0.1:8080/authenticate");
-      if (!res.ok) throw new Error("Token request failed");
-      const data = await res.json();
-      setToken(data.token);
-      setUsername(data.username);
-      console.log(data);
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  }
+  // async function fetchToken() {
+  //   try {
+  //     const res = await fetch("http://127.0.0.1:8080/authenticate");
+  //     if (!res.ok) throw new Error("Token request failed");
+  //     const data = await res.json();
+  //     setToken(data.token);
+  //     setUsername(data.username);
+  //     console.log(data);
+  //   } catch (err) {
+  //     console.error("Error:", err);
+  //   }
+  // }
 
   async function authenticate(code: string) {
     try {
@@ -132,9 +132,9 @@ export default function Main() {
   }
 
   async function handleLogin() {
-    let randomString = String(Math.random() * 10000);
+    const randomString = String(Math.random() * 10000);
     localStorage.setItem("reddit_oauth_string", randomString);
-    var OAuthString = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&state=${randomString}&redirect_uri=${encodeURIComponent(
+    let OAuthString = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&state=${randomString}&redirect_uri=${encodeURIComponent(
       REDIRECT_URI
     )}&duration=${DURATION}&scope=${encodeURIComponent(SCOPE_STRING)}`;
     window.location.href = OAuthString;

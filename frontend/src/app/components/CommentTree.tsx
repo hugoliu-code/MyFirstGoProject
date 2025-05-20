@@ -9,7 +9,7 @@ export type CommentData = {
 // Recursive TreeNode component
 const CommentNode: React.FC<{
   node: CommentData;
-  onClick: Function;
+  onClick: (comments: CommentData[]) => Promise<void>;
   path?: CommentData[];
 }> = ({ node, onClick, path = [] }) => {
   const currentPath = [...path, node];
