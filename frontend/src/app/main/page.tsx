@@ -134,7 +134,7 @@ export default function Main() {
   async function handleLogin() {
     const randomString = String(Math.random() * 10000);
     localStorage.setItem("reddit_oauth_string", randomString);
-    let OAuthString = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&state=${randomString}&redirect_uri=${encodeURIComponent(
+    const OAuthString = `https://www.reddit.com/api/v1/authorize?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&state=${randomString}&redirect_uri=${encodeURIComponent(
       REDIRECT_URI
     )}&duration=${DURATION}&scope=${encodeURIComponent(SCOPE_STRING)}`;
     window.location.href = OAuthString;
